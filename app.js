@@ -77,7 +77,15 @@ async function cleanDirectory(directory) {
 
     for (const file of files) {
         const filePath = path.join(directory, file);
-        await fs.unlink(filePath);
+        const stat = await fs.stat(filePath);
+
+        if (stat.isDirectory()) {
+            // Se for um diretório, chama cleanDirectory recursivamente
+            await cleanDirectory(filePath);
+        } else {
+            // Se for um arquivo, usa unlink para excluir
+            await fs.unlink(filePath);
+        }
     }
 }
 

@@ -12,7 +12,11 @@ node V16
 
 ```sh
 #SERVER INFO
-SERVER_NAME="nameserver" 
+SERVER_NAME="nameserver"
+
+#CRON INFO
+CRON_TIME="0 */6 * * *"  #6h in 6h
+
 #MONGO INFO
 DB_USER="user_database"
 DB_PASS="password_database"

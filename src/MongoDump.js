@@ -5,6 +5,7 @@ const ftp = require('basic-ftp');
 const { format } = require('date-fns');
 const fs = require('fs').promises;
 const path = require('path');
+const { senMessageTelegran } = require('./Services/sendTelegramAlert')
 
 
 // Credenciais para conexão com o banco de dados
@@ -97,13 +98,29 @@ exports.exeMongodump = async () => {
         // Fechar conexão FTP
         await client.close();
 
-        console.log('Backup e upload concluídos com sucesso.');
+        console.log(`Backup e upload concluídos com sucesso ${formattedDate}.`);
+
+        let detailMessage = {
+            serverName: process.env.SERVER_NAME,
+            type: 'Backup',
+            status: 'Success',
+            message: `Backup e upload concluídos com sucesso ${formattedDate}.`,
+        }
+        senMessageTelegran(detailMessage);
         // Limpar o conteúdo da pasta temp
         await cleanDirectory(tempBackupDir);
 
         // Limpar o conteúdo da pasta dump
         await cleanDirectory(dumpDir);
     } catch (error) {
+
+        let detailMessage = {
+            serverName: process.env.SERVER_NAME,
+            type: 'Backup',
+            status: 'Error',
+            message: `Erro ao executar backup e upload: ${error.message}`,
+        }
+        senMessageTelegran(detailMessage);
         console.error('Erro:', error.message);
     }
 }

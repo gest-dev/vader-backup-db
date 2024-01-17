@@ -1,6 +1,6 @@
 const cronJob = require("cron").job;
 // Webscraping Imports
-const MongoDump = require("./MongoDump");
+const MongoDump = require("./src/MongoDump");
 
 MongoDump.exeMongodump();
 cronJob(

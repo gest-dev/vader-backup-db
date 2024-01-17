@@ -1,10 +1,9 @@
 require("dotenv").config();
-const MongoClient = require('mongodb').MongoClient;
+const { MongoClient } = require('mongodb');
 const { exec } = require('child_process');
-const fs = require('fs');
 const ftp = require('basic-ftp');
 
-// Credencials for database connection
+// Credenciais para conexão com o banco de dados
 const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASS;
 const dbHost = process.env.DB_HOST;
@@ -22,11 +21,11 @@ async function backupAndUpload() {
         // Criar backup com mongodump
         const backupDir = '/dump';
         const backupCommand = `mongodump --uri="${mongodbURI}" --out=${backupDir}`;
-        await execCommand(backupCommand);
+        await execCommand(backupCommand, 'MongoDB Dump');
 
         // Compactar backup (opcional)
         const tarCommand = `tar -zcvf ${backupDir}/backup.tar.gz ${backupDir}`;
-        await execCommand(tarCommand);
+        await execCommand(tarCommand, 'Compress Backup');
 
         // Conectar ao servidor FTP
         const client = new ftp.Client();
@@ -42,16 +41,18 @@ async function backupAndUpload() {
 
         console.log('Backup e upload concluídos com sucesso.');
     } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro:', error.message);
     }
 }
 
-function execCommand(command) {
+function execCommand(command, operation) {
     return new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
             if (error) {
+                console.error(`${operation} Error:`, error.message);
                 reject(error);
             } else {
+                console.log(`${operation} Output:`, stdout || stderr);
                 resolve(stdout || stderr);
             }
         });
@@ -60,4 +61,4 @@ function execCommand(command) {
 
 backupAndUpload();
 // Executar backup e upload a cada 30 minutos
-//setInterval(backupAndUpload, 30 * 60 * 1000);
+// setInterval(backupAndUpload, 30 * 60 * 1000);

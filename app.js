@@ -49,10 +49,10 @@ async function backupAndUpload() {
 
         console.log('Backup e upload concluídos com sucesso.');
         // Limpar a pasta temp
-        await fs.rmdir(tempBackupDir, { recursive: true });
+        await fs.rm(tempBackupDir, { recursive: true });
 
         // Limpar a pasta dump
-        await fs.rmdir(dumpDir, { recursive: true });
+        await fs.rm(dumpDir, { recursive: true });
     } catch (error) {
         console.error('Erro:', error.message);
     }

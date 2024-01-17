@@ -13,6 +13,7 @@ const mongodbURI = `mongodb://${dbUser}:${dbPassword}@${dbHost}/${dbName}`;
 const ftpConfig = {
     host: process.env.FTP_HOST,
     user: process.env.FTP_USER,
+    port: process.env.FTP_PORT,
     password: process.env.FTP_PASS,
 };
 

@@ -12,15 +12,16 @@ exports.senMessageTelegran = async (detailMessage) => {
 
     // Criar a mensagem com quebra de linha
     const message = `
-*ServerName*: ${detailMessage.serverName}
-*Type*: ${detailMessage.type}
-*Status*: ${detailMessage.status}
-*Message*: ${detailMessage.message}
-*Date*: ${formattedDate}
+**ServerName: **${detailMessage.serverName}**
+**Type:** ${detailMessage.type}
+**Status:** ${detailMessage.status}
+**Message:** ${detailMessage.message}
+**Date:** ${formattedDate}
 `;
 
-    // Enviar a mensagem
-    await bot.telegram.sendMessage(process.env.BOT_CHATID, message);
+
+    // Enviar a mensagem com formatação Markdown
+    await bot.telegram.sendMessage(process.env.BOT_CHATID, message, { parse_mode: 'Markdown' });
 
   }
   catch (error) {

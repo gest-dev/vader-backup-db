@@ -104,7 +104,7 @@ exports.exeMongodump = async () => {
             serverName: process.env.SERVER_NAME,
             type: 'Backup',
             status: 'Success',
-            message: `Backup e upload concluídos com sucesso ${formattedDate}.`,
+            message: `Backup e upload concluídos com sucesso!`,
         }
         senMessageTelegran(detailMessage);
         // Limpar o conteúdo da pasta temp

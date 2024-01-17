@@ -28,17 +28,17 @@ async function backupAndUpload() {
         const tarCommand = `tar -zcvf ${backupDir}/backup.tar.gz ${backupDir}`;
         await execCommand(tarCommand, 'Compress Backup');
 
-        // Conectar ao servidor FTP
-        const client = new ftp.Client();
-        await client.access(ftpConfig);
+        // // Conectar ao servidor FTP
+        // const client = new ftp.Client();
+        // await client.access(ftpConfig);
 
-        // Enviar arquivo para o servidor FTP
-        const localFilePath = `${backupDir}/backup.tar.gz`;
-        const remoteFilePath = `${process.env.FTP_DIR}/backup_${new Date().getTime()}.tar.gz`;
-        await client.uploadFrom(localFilePath, remoteFilePath);
+        // // Enviar arquivo para o servidor FTP
+        // const localFilePath = `${backupDir}/backup.tar.gz`;
+        // const remoteFilePath = `${process.env.FTP_DIR}/backup_${new Date().getTime()}.tar.gz`;
+        // await client.uploadFrom(localFilePath, remoteFilePath);
 
-        // Fechar conexão FTP
-        await client.close();
+        // // Fechar conexão FTP
+        // await client.close();
 
         console.log('Backup e upload concluídos com sucesso.');
     } catch (error) {

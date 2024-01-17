@@ -4,7 +4,7 @@ const MongoDump = require("./MongoDump");
 
 MongoDump.exeMongodump();
 cronJob(
-    "1 */10 * * * *",
+    "1 */6 * * *",
     () => {
         MongoDump.exeMongodump();
     },

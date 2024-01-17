@@ -15,6 +15,7 @@ exports.senMessageTelegran = async (detailMessage) => {
 **ServerName: **${detailMessage.serverName}**
 **Type:** ${detailMessage.type}
 **Status:** ${detailMessage.status}
+**SendType:** ${detailMessage.sendType}
 **Message:** ${detailMessage.message}
 **Date:** ${formattedDate}
 `;

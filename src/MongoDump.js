@@ -102,6 +102,7 @@ exports.exeMongodump = async () => {
         let detailMessage = {
             serverName: process.env.SERVER_NAME,
             type: 'Backup',
+            sendType: process.env.SEND_TYPE,
             status: 'Success',
             message: `Backup e upload concluídos com sucesso!`,
         }
@@ -116,6 +117,7 @@ exports.exeMongodump = async () => {
         let detailMessage = {
             serverName: process.env.SERVER_NAME,
             type: 'Backup',
+            sendType: process.env.SEND_TYPE,
             status: 'Error',
             message: `Erro ao executar backup e upload: ${error.message}`,
         }

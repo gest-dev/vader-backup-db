@@ -17,6 +17,9 @@ SERVER_NAME="nameserver"
 #CRON INFO
 CRON_TIME="0 */6 * * *"  #6h in 6h
 
+#TYPE SEND
+SEND_TYPE="FTP"
+
 #MONGO INFO
 DB_USER="user_database"
 DB_PASS="password_database"

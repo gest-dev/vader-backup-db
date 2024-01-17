@@ -20,13 +20,12 @@ const ftpConfig = {
 async function backupAndUpload() {
     try {
         // Criar backup com mongodump
-        const backupDir = 'dump';
-        const tempDir = 'temp';
-        const backupCommand = `mongodump --uri="${mongodbURI}" --out=${tempDir}`;
+        const backupDir = '/dump';
+        const backupCommand = `mongodump --uri="${mongodbURI}" --out=${backupDir}`;
         await execCommand(backupCommand, 'MongoDB Dump');
 
-        // Compactar backup (opcional)
-        const tarCommand = `tar -zcvf ${tempDir}/backup.tar.gz ${backupDir} .`;
+        // Compactar backup
+        const tarCommand = `tar -zcvf ${backupDir}/backup.tar.gz -C ${backupDir} .`;
         await execCommand(tarCommand, 'Compress Backup');
 
         // Conectar ao servidor FTP

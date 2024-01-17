@@ -24,7 +24,7 @@ FTP_HOST="host_ftp"
 FTP_PORT="host_port"
 FTP_USER="host_username"
 FTP_PASS="host_password"
-FTP_DIR="ftp_dir_host Exemple /home/user/storage_ftp"
+FTP_DIR="Exemple /home/user/storage_ftp"
 
 #BOT TELEGRAN
 BOT_TOKEN = "token_telegran"

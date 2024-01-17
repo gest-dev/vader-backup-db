@@ -1,8 +1,8 @@
 require("dotenv").config();
-const { MongoClient } = require('mongodb');
 const { exec } = require('child_process');
 const ftp = require('basic-ftp');
 const { format } = require('date-fns');
+const fs = require('fs').promises;
 
 
 // Credenciais para conexão com o banco de dados
@@ -48,6 +48,11 @@ async function backupAndUpload() {
         await client.close();
 
         console.log('Backup e upload concluídos com sucesso.');
+        // Limpar a pasta temp
+        await fs.rmdir(tempBackupDir, { recursive: true });
+
+        // Limpar a pasta dump
+        await fs.rmdir(dumpDir, { recursive: true });
     } catch (error) {
         console.error('Erro:', error.message);
     }

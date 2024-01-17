@@ -24,6 +24,11 @@ async function backupAndUpload() {
         // Criar backup com mongodump
         const dumpDir = 'dump';
         const tempBackupDir = 'temp';
+        // Criar as pastas se não existirem
+        await ensureDirectoryExists(dumpDir);
+        await ensureDirectoryExists(tempBackupDir);
+
+        // Executar o comando de backup
         const backupCommand = `mongodump --uri="${mongodbURI}" --out=${tempBackupDir}`;
         await execCommand(backupCommand, 'MongoDB Dump');
 
@@ -48,13 +53,31 @@ async function backupAndUpload() {
         await client.close();
 
         console.log('Backup e upload concluídos com sucesso.');
-        // Limpar a pasta temp
-        await fs.rm(tempBackupDir, { recursive: true });
+        // Limpar o conteúdo da pasta temp
+        await cleanDirectory(tempBackupDir);
 
-        // Limpar a pasta dump
-        await fs.rm(dumpDir, { recursive: true });
+        // Limpar o conteúdo da pasta dump
+        await cleanDirectory(dumpDir);
     } catch (error) {
         console.error('Erro:', error.message);
+    }
+}
+
+async function ensureDirectoryExists(directory) {
+    try {
+        await fs.access(directory);
+    } catch (error) {
+        // Se ocorrer um erro, a pasta não existe e será criada
+        await fs.mkdir(directory);
+    }
+}
+
+async function cleanDirectory(directory) {
+    const files = await fs.readdir(directory);
+
+    for (const file of files) {
+        const filePath = path.join(directory, file);
+        await fs.unlink(filePath);
     }
 }
 

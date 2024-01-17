@@ -3,7 +3,7 @@ const { exec } = require('child_process');
 const ftp = require('basic-ftp');
 const { format } = require('date-fns');
 const fs = require('fs').promises;
-
+const path = require('path');
 
 // Credenciais para conexão com o banco de dados
 const dbUser = process.env.DB_USER;

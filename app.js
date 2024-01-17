@@ -26,7 +26,7 @@ async function backupAndUpload() {
         await execCommand(backupCommand, 'MongoDB Dump');
 
         // Compactar backup
-        const tarCommand = `tar -zcvf ${dumpDir}/backup.tar.gz -C ${tempBackupDir} .`;
+        const tarCommand = `tar -zcvf ${tempBackupDir}/backup.tar.gz -C ${dumpDir} .`;
         await execCommand(tarCommand, 'Compress Backup');
 
         // Conectar ao servidor FTP

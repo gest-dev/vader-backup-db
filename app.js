@@ -2,6 +2,8 @@ require("dotenv").config();
 const { MongoClient } = require('mongodb');
 const { exec } = require('child_process');
 const ftp = require('basic-ftp');
+const { format } = require('date-fns');
+
 
 // Credenciais para conexão com o banco de dados
 const dbUser = process.env.DB_USER;
@@ -33,9 +35,13 @@ async function backupAndUpload() {
         const client = new ftp.Client();
         await client.access(ftpConfig);
 
+        // Data hora atual
+        const now = new Date();
+        const formattedDate = format(now, 'dd_MM_yyyy-HH_mm_ss');
+
         // Enviar arquivo para o servidor FTP
         const localFilePath = `${dumpDir}/backup.tar.gz`;
-        const remoteFilePath = `${process.env.FTP_DIR}/backup_${new Date().getTime()}.tar.gz`;
+        const remoteFilePath = `${process.env.FTP_DIR}/backup_${formattedDate}.tar.gz`;
         await client.uploadFrom(localFilePath, remoteFilePath);
 
         // Fechar conexão FTP

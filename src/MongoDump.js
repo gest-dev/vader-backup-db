@@ -90,6 +90,8 @@ exports.exeMongodump = async () => {
             sendType: process.env.SEND_TYPE,
             status: 'Success',
             message: `Backup e upload concluídos com sucesso!`,
+            ETag: '',
+            Location: '',
         }
 
         if (process.env.SEND_TYPE == 'FTP') {
@@ -103,7 +105,7 @@ exports.exeMongodump = async () => {
             //CONTABO_DIR
             const remoteFilePath = `backup_${formattedDate}.tar.gz`;
             const result = await uploadToContabo(localFilePath, remoteFilePath);
-            detailMessage.Etag = result.ETag;
+            detailMessage.ETag = result.ETag;
             detailMessage.Location = result.Location;
         }
         else {
@@ -111,7 +113,7 @@ exports.exeMongodump = async () => {
         }
 
         console.log(`Backup e upload concluídos com sucesso ${formattedDate}.`);
-        senMessageTelegran(detailMessage);
+        await senMessageTelegran(detailMessage);
 
         // Limpar o conteúdo da pasta temp
         await cleanDirectory(tempBackupDir);

@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk');
+const fs = require('fs').promises;
 
 async function uploadToSW3(localFilePath, remoteFilePath) {
     try {

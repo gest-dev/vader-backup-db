@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.1540.0",
     "axios": "^1.6.5",
     "basic-ftp": "^5.0.4",
     "child_process": "^1.0.2",

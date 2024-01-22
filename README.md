@@ -11,29 +11,5 @@ node V16
 ## .env Exemple
 
 ```sh
-#SERVER INFO
-SERVER_NAME="nameserver"
 
-#CRON INFO
-CRON_TIME="0 */6 * * *"  #6h in 6h
-
-#TYPE SEND
-SEND_TYPE="FTP"
-
-#MONGO INFO
-DB_USER="user_database"
-DB_PASS="password_database"
-DB_HOST="host:port"
-DB_DBNAME="name_database"
-
-#FTP
-FTP_HOST="host_ftp"
-FTP_PORT="host_port"
-FTP_USER="host_username"
-FTP_PASS="host_password"
-FTP_DIR="Exemple /home/user/storage_ftp"
-
-#BOT TELEGRAN
-BOT_TOKEN = "token_telegran"
-BOT_CHATID = "id_chat_bot"
 ```

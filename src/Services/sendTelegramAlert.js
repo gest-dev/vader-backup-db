@@ -18,8 +18,7 @@ exports.senMessageTelegran = async (detailMessage) => {
 **SendType:** ${detailMessage.sendType}
 **Message:** ${detailMessage.message}
 **Date:** ${formattedDate}
-**ETag:** ${detailMessage.ETag}
-**Location:** ${detailMessage.Location}
+**ETag:** ${detailMessage?.ETag}
 `;
 
 

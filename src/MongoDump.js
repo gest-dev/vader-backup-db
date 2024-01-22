@@ -85,6 +85,7 @@ async function uploadToFTP(localFilePath, remoteFilePath) {
         await client.close();
     }
 }
+
 async function uploadToSW3(localFilePath, remoteFilePath) {
     try {
         // Configurar as credenciais AWS (configure-as com suas próprias credenciais)
@@ -117,7 +118,7 @@ async function uploadToContabo(localFilePath, remoteFilePath) {
     try {
         // Configurar as credenciais Contabo (substitua com suas próprias credenciais)
         AWS.config.update({
-            accessKeyId: process.env.CONTABO_ACCESS_KEY_ID ,
+            accessKeyId: process.env.CONTABO_ACCESS_KEY_ID,
             secretAccessKey: process.env.CONTABO_SECRET_ACCESS_KEY,
             region: process.env.CONTABO_REGION, // substitua pela região apropriada
         });
@@ -136,13 +137,14 @@ async function uploadToContabo(localFilePath, remoteFilePath) {
 
         // Realizar o upload para a Contabo Storage
         const result = await s3.upload(params).promise();
+        return result;
 
-        console.log(`Upload para Contabo Storage concluído com sucesso: ${result.Location}`);
     } catch (error) {
         console.error(`Erro durante o upload para Contabo Storage: ${error.message}`);
         throw error;
     }
 }
+
 exports.exeMongodump = async () => {
 
     try {
@@ -161,30 +163,12 @@ exports.exeMongodump = async () => {
         const tarCommand = `tar -zcvf ${dumpDir}/backup.tar.gz -C ${tempBackupDir} .`;
         await execCommand(tarCommand, 'Compress Backup');
 
-
-
         // Data hora atual
         const now = new Date();
         const formattedDate = format(now, 'dd_MM_yyyy-HH_mm_ss');
 
         // Enviar arquivo para o servidor FTP
         const localFilePath = `${dumpDir}/backup.tar.gz`;
-        const remoteFilePath = `${process.env.FTP_DIR}/backup_${formattedDate}.tar.gz`;
-        if (process.env.SEND_TYPE == 'FTP') {
-            await uploadToFTP(localFilePath, remoteFilePath);            
-        }
-        else if (process.env.SEND_TYPE == 'SW3') {
-            await uploadToSW3(localFilePath, remoteFilePath);
-        }
-        else if (process.env.SEND_TYPE == 'CONTABO') {
-            await uploadToContabo(localFilePath, remoteFilePath);
-        }
-        else {
-            console.log('Tipo de envio não configurado');
-        }
-
-        console.log(`Backup e upload concluídos com sucesso ${formattedDate}.`);
-
         let detailMessage = {
             serverName: process.env.SERVER_NAME,
             type: 'Backup',
@@ -192,7 +176,27 @@ exports.exeMongodump = async () => {
             status: 'Success',
             message: `Backup e upload concluídos com sucesso!`,
         }
-        // senMessageTelegran(detailMessage);
+
+        if (process.env.SEND_TYPE == 'FTP') {
+            const remoteFilePath = `${process.env.FTP_DIR}/backup_${formattedDate}.tar.gz`;
+            await uploadToFTP(localFilePath, remoteFilePath);
+        }
+        else if (process.env.SEND_TYPE == 'SW3') {
+            await uploadToSW3(localFilePath, remoteFilePath);
+        }
+        else if (process.env.SEND_TYPE == 'CONTABO') {
+            //CONTABO_DIR
+            const remoteFilePath = `backup_${formattedDate}.tar.gz`;
+            const result = await uploadToContabo(localFilePath, remoteFilePath);
+            detailMessage.Etag = result.ETag;
+            detailMessage.Location = result.Location;
+        }
+        else {
+            console.log('Tipo de envio não configurado');
+        }
+
+        console.log(`Backup e upload concluídos com sucesso ${formattedDate}.`);
+        senMessageTelegran(detailMessage);
 
         // Limpar o conteúdo da pasta temp
         await cleanDirectory(tempBackupDir);
@@ -208,7 +212,7 @@ exports.exeMongodump = async () => {
             status: 'Error',
             message: `Erro ao executar backup e upload: ${error.message}`,
         }
-        //senMessageTelegran(detailMessage);
+        senMessageTelegran(detailMessage);
         console.error('Erro:', error.message);
     }
 }

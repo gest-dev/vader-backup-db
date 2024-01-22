@@ -105,10 +105,8 @@ exports.exeMongodump = async () => {
             //CONTABO_DIR
             const remoteFilePath = `backup_${formattedDate}.tar.gz`;
             const result = await uploadToContabo(localFilePath, remoteFilePath);
-            console.log(result);
             detailMessage.ETag = result.ETag;
             detailMessage.Location = result.Location;
-            console.log(detailMessage);
         }
         else {
             console.log('Tipo de envio não configurado');

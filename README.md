@@ -8,7 +8,6 @@ node V16
 3) Run app
     1) node app_dump.js
 
-## .env Exemple
 
 ```sh
 

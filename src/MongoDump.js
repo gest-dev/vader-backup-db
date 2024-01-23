@@ -95,15 +95,16 @@ exports.exeMongodump = async () => {
         }
 
         if (process.env.SEND_TYPE == 'FTP') {
-            const remoteFilePath = `${process.env.FTP_DIR}/backup_${formattedDate}.tar.gz`;
+            const remoteFilePath = `${process.env.FTP_DIR}/${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
             await uploadToFTP(localFilePath, remoteFilePath);
         }
         else if (process.env.SEND_TYPE == 'SW3') {
+            const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
             await uploadToSW3(localFilePath, remoteFilePath);
         }
         else if (process.env.SEND_TYPE == 'CONTABO') {
             //CONTABO_DIR
-            const remoteFilePath = `backup_${formattedDate}.tar.gz`;
+            const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
             const result = await uploadToContabo(localFilePath, remoteFilePath);
             detailMessage.ETag = result.ETag;
             detailMessage.Location = result.Location;

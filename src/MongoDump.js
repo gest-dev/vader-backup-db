@@ -148,9 +148,13 @@ exports.exeMongodump = async () => {
         }
 
         console.log(`Backup e upload concluídos com sucesso ${formattedDate}.`);
-        await senMessageTelegran(detailMessage);
 
-        await senAlertApiWhatsapp(detailMessage);
+        if (process.env.SEND_ALERT_TELEGRAM) {
+            await senMessageTelegran(detailMessage);
+        }
+        else if (process.env.SEND_ALERT_WHATSAPP) {
+            await senAlertApiWhatsapp(detailMessage);
+        }
 
         // Limpar o conteúdo da pasta temp
         await cleanDirectory(tempBackupDir);
@@ -166,8 +170,14 @@ exports.exeMongodump = async () => {
             status: 'Error',
             message: `Erro ao executar backup e upload: ${error.message}`,
         }
-        //await senMessageTelegran(detailMessage);
-        await senAlertApiWhatsapp(detailMessage);
+    
+        if (process.env.SEND_ALERT_TELEGRAM) {
+            await senMessageTelegran(detailMessage);
+        }
+        else if (process.env.SEND_ALERT_WHATSAPP) {
+            await senAlertApiWhatsapp(detailMessage);
+        }
+
         console.error('Erro:', error.message);
     }
 }

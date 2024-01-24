@@ -16,7 +16,6 @@ exports.senMessageTelegran = async (detailMessage) => {
 **SendType:** Backup ${detailMessage.sendType}
 **FileName:** ${detailMessage?.FileName}
 **size:** ${detailMessage?.size}
-**Date:** ${formattedDate}
 **Message:** ${detailMessage.message}
 `;
 

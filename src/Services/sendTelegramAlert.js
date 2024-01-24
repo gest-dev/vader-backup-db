@@ -16,9 +16,12 @@ exports.senMessageTelegran = async (detailMessage) => {
 **Type:** ${detailMessage.type}
 **Status:** ${detailMessage.status}
 **SendType:** ${detailMessage.sendType}
-**Message:** ${detailMessage.message}
-**Date:** ${formattedDate}
 **ETag:** ${detailMessage?.ETag}
+**FileName:** ${detailMessage?.FileName}
+**size:** ${detailMessage?.size}
+**Date:** ${formattedDate}
+**Message:** ${detailMessage.message}
+
 `;
 
 

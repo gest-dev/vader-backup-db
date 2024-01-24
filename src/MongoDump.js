@@ -6,9 +6,16 @@ const path = require('path');
 
 const { senMessageTelegran } = require('./Services/sendTelegramAlert')
 const { senAlertApiWhatsapp } = require('./Services/sendAlertApiWhatsapp')
-const { uploadToFTP } = require('./Services/FTP');
-const { uploadToSW3 } = require('./Services/S3Aws');
-const { uploadToContabo } = require('./Services/ContaboAws');
+if (process.env.SEND_TYPE == 'FTP') {
+    const { uploadToFTP } = require('./Services/FTP');
+}
+if (process.env.SEND_TYPE == 'SW3') {
+    const { uploadToSW3 } = require('./Services/S3Aws');
+}
+
+if (process.env.SEND_TYPE == 'CONTABO') {
+    const { uploadToContabo } = require('./Services/ContaboAws');
+}
 
 
 // Credenciais para conexão com o banco de dados
@@ -60,25 +67,25 @@ function execCommand(command, operation) {
     });
 }
 
-async function fileSize(fileDir) {
-    // Obtendo informações do arquivo
-    await fs.stat(fileDir, (err, stats) => {
-        if (err) {
-            console.error('Erro ao obter informações do arquivo:', err);
-            return;
-        }
-
+async function fileSizeInfo(localFilePath) {
+    
+    try {
+        // Obtendo informações do arquivo
+        const stats = await fs.stat(localFilePath);
         // Tamanho do arquivo em bytes
         const tamanhoDoArquivoEmBytes = stats.size;
 
         // Convertendo bytes para kilobytes
         const tamanhoDoArquivoEmKB = tamanhoDoArquivoEmBytes / 1024;
-
+        
         return {
             size: tamanhoDoArquivoEmBytes,
-            sizeKB: tamanhoDoArquivoEmKB
+            sizeKB: tamanhoDoArquivoEmKB.toFixed(2) + ' KB',
         };
-    });
+    } catch (err) {
+        console.error('Erro ao obter informações do arquivo:', err);
+        throw err;
+    }
 }
 
 
@@ -104,9 +111,9 @@ exports.exeMongodump = async () => {
         const now = new Date();
         const formattedDate = format(now, 'dd_MM_yyyy-HH_mm_ss');
 
-        // Enviar arquivo para o servidor FTP
+        //Enviar arquivo para o servidor FTP
         const localFilePath = `${dumpDir}/backup.tar.gz`;
-        let infoFileSize = await fileSize(localFilePath);
+        let infoFileSize = await fileSizeInfo(localFilePath);
 
         let detailMessage = {
             serverName: process.env.SERVER_NAME,
@@ -117,7 +124,7 @@ exports.exeMongodump = async () => {
             ETag: '',
             Location: '',
         }
-        console.log(infoFileSize);
+   
         if (process.env.SEND_TYPE == 'FTP') {
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
 
@@ -149,10 +156,10 @@ exports.exeMongodump = async () => {
 
         console.log(`Backup e upload concluídos com sucesso ${formattedDate}.`);
 
-        if (process.env.SEND_ALERT_TELEGRAM) {
+        if (process.env.SEND_ALERT_TELEGRAM == 'true') {
             await senMessageTelegran(detailMessage);
         }
-        else if (process.env.SEND_ALERT_WHATSAPP) {
+        if (process.env.SEND_ALERT_WHATSAPP == 'true') {
             await senAlertApiWhatsapp(detailMessage);
         }
 
@@ -170,11 +177,11 @@ exports.exeMongodump = async () => {
             status: 'Error',
             message: `Erro ao executar backup e upload: ${error.message}`,
         }
-    
-        if (process.env.SEND_ALERT_TELEGRAM) {
+
+        if (process.env.SEND_ALERT_TELEGRAM == 'true') {
             await senMessageTelegran(detailMessage);
         }
-        else if (process.env.SEND_ALERT_WHATSAPP) {
+        if (process.env.SEND_ALERT_WHATSAPP == 'true') {
             await senAlertApiWhatsapp(detailMessage);
         }
 

@@ -117,7 +117,7 @@ exports.exeMongodump = async () => {
             ETag: '',
             Location: '',
         }
-
+        console.log(infoFileSize);
         if (process.env.SEND_TYPE == 'FTP') {
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
 

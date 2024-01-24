@@ -13,13 +13,11 @@ exports.senMessageTelegran = async (detailMessage) => {
     // Criar a mensagem com quebra de linha
     const message = `
 **ServerName: **${detailMessage.serverName}**
-**Status:** ${detailMessage.status}
 **SendType:** Backup ${detailMessage.sendType}
 **FileName:** ${detailMessage?.FileName}
 **size:** ${detailMessage?.size}
 **Date:** ${formattedDate}
 **Message:** ${detailMessage.message}
-
 `;
 
 

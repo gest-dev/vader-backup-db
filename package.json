@@ -18,6 +18,7 @@
     "dotenv": "^16.0.1",
     "fs": "^0.0.1-security",
     "mongodb": "^6.3.0",
-    "telegraf": "^4.15.3"
+    "telegraf": "^4.15.3",
+    "request": "^2.88.2"
   }
 }

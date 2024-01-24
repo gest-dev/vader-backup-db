@@ -5,6 +5,7 @@ const fs = require('fs').promises;
 const path = require('path');
 
 const { senMessageTelegran } = require('./Services/sendTelegramAlert')
+const { senAlertApiWhatsapp } = require('./Services/sendAlertApiWhatsapp')
 const { uploadToFTP } = require('./Services/FTP');
 const { uploadToSW3 } = require('./Services/S3Aws');
 const { uploadToContabo } = require('./Services/ContaboAws');
@@ -59,6 +60,27 @@ function execCommand(command, operation) {
     });
 }
 
+async function fileSize(fileDir) {
+    // Obtendo informações do arquivo
+    await fs.stat(fileDir, (err, stats) => {
+        if (err) {
+            console.error('Erro ao obter informações do arquivo:', err);
+            return;
+        }
+
+        // Tamanho do arquivo em bytes
+        const tamanhoDoArquivoEmBytes = stats.size;
+
+        // Convertendo bytes para kilobytes
+        const tamanhoDoArquivoEmKB = tamanhoDoArquivoEmBytes / 1024;
+
+        return {
+            size: tamanhoDoArquivoEmBytes,
+            sizeKB: tamanhoDoArquivoEmKB
+        };
+    });
+}
+
 
 exports.exeMongodump = async () => {
 
@@ -84,6 +106,8 @@ exports.exeMongodump = async () => {
 
         // Enviar arquivo para o servidor FTP
         const localFilePath = `${dumpDir}/backup.tar.gz`;
+        let infoFileSize = await fileSize(localFilePath);
+
         let detailMessage = {
             serverName: process.env.SERVER_NAME,
             type: 'Backup',
@@ -95,17 +119,27 @@ exports.exeMongodump = async () => {
         }
 
         if (process.env.SEND_TYPE == 'FTP') {
-            const remoteFilePath = `${process.env.FTP_DIR}/${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
-            await uploadToFTP(localFilePath, remoteFilePath);
+            const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
+
+            await uploadToFTP(localFilePath, `${process.env.FTP_DIR}/${remoteFilePath}`);
+            detailMessage.FileName = remoteFilePath;
+            detailMessage.size = infoFileSize.sizeKB;
         }
         else if (process.env.SEND_TYPE == 'SW3') {
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
-            await uploadToSW3(localFilePath, remoteFilePath);
+
+            const result = await uploadToSW3(localFilePath, remoteFilePath);
+            detailMessage.FileName = remoteFilePath;
+            detailMessage.size = infoFileSize.sizeKB;
+            detailMessage.ETag = result.ETag;
+            detailMessage.Location = result.Location;
         }
         else if (process.env.SEND_TYPE == 'CONTABO') {
-            //CONTABO_DIR
+
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
             const result = await uploadToContabo(localFilePath, remoteFilePath);
+            detailMessage.FileName = remoteFilePath;
+            detailMessage.size = infoFileSize.sizeKB;
             detailMessage.ETag = result.ETag;
             detailMessage.Location = result.Location;
         }
@@ -115,6 +149,8 @@ exports.exeMongodump = async () => {
 
         console.log(`Backup e upload concluídos com sucesso ${formattedDate}.`);
         await senMessageTelegran(detailMessage);
+
+        await senAlertApiWhatsapp(detailMessage);
 
         // Limpar o conteúdo da pasta temp
         await cleanDirectory(tempBackupDir);
@@ -130,7 +166,8 @@ exports.exeMongodump = async () => {
             status: 'Error',
             message: `Erro ao executar backup e upload: ${error.message}`,
         }
-        senMessageTelegran(detailMessage);
+        //await senMessageTelegran(detailMessage);
+        await senAlertApiWhatsapp(detailMessage);
         console.error('Erro:', error.message);
     }
 }

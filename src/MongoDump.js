@@ -6,16 +6,11 @@ const path = require('path');
 
 const { senMessageTelegran } = require('./Services/sendTelegramAlert')
 const { senAlertApiWhatsapp } = require('./Services/sendAlertApiWhatsapp')
-if (process.env.SEND_TYPE == 'FTP') {
-    const { uploadToFTP } = require('./Services/FTP');
-}
-if (process.env.SEND_TYPE == 'SW3') {
-    const { uploadToSW3 } = require('./Services/S3Aws');
-}
 
-if (process.env.SEND_TYPE == 'CONTABO') {
-    const { uploadToContabo } = require('./Services/ContaboAws');
-}
+const { uploadToFTP } = require('./Services/FTP');
+const { uploadToSW3 } = require('./Services/S3Aws');
+const { uploadToContabo } = require('./Services/ContaboAws');
+
 
 
 // Credenciais para conexão com o banco de dados
@@ -68,7 +63,7 @@ function execCommand(command, operation) {
 }
 
 async function fileSizeInfo(localFilePath) {
-    
+
     try {
         // Obtendo informações do arquivo
         const stats = await fs.stat(localFilePath);
@@ -77,7 +72,7 @@ async function fileSizeInfo(localFilePath) {
 
         // Convertendo bytes para kilobytes
         const tamanhoDoArquivoEmKB = tamanhoDoArquivoEmBytes / 1024;
-        
+
         return {
             size: tamanhoDoArquivoEmBytes,
             sizeKB: tamanhoDoArquivoEmKB.toFixed(2) + ' KB',
@@ -124,7 +119,7 @@ exports.exeMongodump = async () => {
             ETag: '',
             Location: '',
         }
-   
+
         if (process.env.SEND_TYPE == 'FTP') {
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
 

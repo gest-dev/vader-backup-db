@@ -27,6 +27,6 @@ exports.senMessageTelegran = async (detailMessage) => {
 
   }
   catch (error) {
-    console.error("Error Enviar mensagem telegran: ", error);
+    console.error("Error Enviar mensagem telegran: ", error.message);
   }
 }

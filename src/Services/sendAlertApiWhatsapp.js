@@ -38,6 +38,6 @@ exports.senAlertApiWhatsapp = async (detailMessage) => {
     });
 
   } catch (error) {
-    console.error("Error Enviar mensagem whatsapp: ", error);
+    console.error("Error Enviar mensagem whatsapp: ", error.message);
   }
 }

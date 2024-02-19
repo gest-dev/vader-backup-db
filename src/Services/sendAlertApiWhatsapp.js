@@ -27,13 +27,17 @@ exports.senAlertApiWhatsapp = async (detailMessage) => {
       })
     };
 
-    await request(options, function (error, response) {
-      if (error) throw new Error(error);
-      //console.log(response.body);
+    const response = await new Promise((resolve, reject) => {
+      request(options, function (error, response, body) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response);
+        }
+      });
     });
 
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error Enviar mensagem whatsapp: ", error);
   }
 }

@@ -5,7 +5,7 @@ const MongoDump = require("./src/MongoDump");
 
 MongoDump.exeMongodump();
 cronJob(
-    `${process.env.CRON_TIME}`,
+    `${process.env.CRON_TIME || "1 1 */6 * * *"}`,
     () => {
         MongoDump.exeMongodump();
     },

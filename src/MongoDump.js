@@ -4,14 +4,14 @@ const { format } = require('date-fns');
 const fs = require('fs').promises;
 const path = require('path');
 
+
 const { senMessageTelegran } = require('./Services/sendTelegramAlert')
 const { senAlertApiWhatsapp } = require('./Services/sendAlertApiWhatsapp')
 
 const { uploadToFTP } = require('./Services/FTP');
 const { uploadToSW3 } = require('./Services/S3Aws');
 const { uploadToContabo } = require('./Services/ContaboAws');
-
-
+const { execConnectBackupMongo } = require('./database-util/execConnectBackupMongo');
 
 // Credenciais para conexão com o banco de dados
 const dbUser = process.env.DB_USER;
@@ -94,9 +94,8 @@ exports.exeMongodump = async () => {
         await ensureDirectoryExists(dumpDir);
         await ensureDirectoryExists(tempBackupDir);
 
-        // Executar o comando de backup
-        const backupCommand = `mongodump --uri="${mongodbURI}" --out=${tempBackupDir}`;
-        await execCommand(backupCommand, 'MongoDB Dump');
+        // Executar backup
+        await execConnectBackupMongo(mongodbURI, tempBackupDir);
 
         // Compactar backup
         const tarCommand = `tar -zcvf ${dumpDir}/backup.tar.gz -C ${tempBackupDir} .`;

@@ -4,23 +4,24 @@ const { format } = require('date-fns');
 const fs = require('fs').promises;
 const path = require('path');
 
+/* Alert */
+const { senMessageTelegran } = require('../Services/alert/sendTelegramAlert')
+const { senAlertApiWhatsapp } = require('../Services/alert/sendAlertApiWhatsapp')
+/* Upload server */
+const { uploadToFTP } = require('../Services/uplaod_service/FTP');
+const { uploadToSW3 } = require('../Services/uplaod_service/S3Aws');
+const { uploadToContabo } = require('../Services/uplaod_service/ContaboAws');
+/* Dump Databases */
+const { execConnectBackupMongo } = require('../Services/database/execConnectBackupMongo');
+const { execConnectBackupMariaDb } = require('../Services/database/execConnectBackupMariaDb');
 
-const { senMessageTelegran } = require('./Services/sendTelegramAlert')
-const { senAlertApiWhatsapp } = require('./Services/sendAlertApiWhatsapp')
-
-const { uploadToFTP } = require('./Services/FTP');
-const { uploadToSW3 } = require('./Services/S3Aws');
-const { uploadToContabo } = require('./Services/ContaboAws');
-const { execConnectBackupMongo } = require('./database-util/execConnectBackupMongo');
-
-// Credenciais para conexão com o banco de dados
+// credentials database
 const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASS;
 const dbHost = process.env.DB_HOST;
 const dbName = process.env.DB_DBNAME;
-
-const mongodbURI = `mongodb://${dbUser}:${dbPassword}@${dbHost}/${dbName}`;
-
+const dbPort = process.env.DB_PORT;
+const dbType = process.env.DB_TYPE;
 
 async function ensureDirectoryExists(directory) {
     try {
@@ -84,7 +85,7 @@ async function fileSizeInfo(localFilePath) {
 }
 
 
-exports.exeMongodump = async () => {
+exports.exeDBDump = async () => {
 
     try {
         // Criar backup com mongodump
@@ -94,8 +95,13 @@ exports.exeMongodump = async () => {
         await ensureDirectoryExists(dumpDir);
         await ensureDirectoryExists(tempBackupDir);
 
-        // Executar backup
-        await execConnectBackupMongo(mongodbURI, tempBackupDir);
+        // Executar backup Mongo
+        if (dbType == 'mongo') {
+            await execConnectBackupMongo(dbHost, dbPort, dbUser, dbPassword, dbName, tempBackupDir);
+        } else if (dbType == 'mariadb') {
+            //Executar backup MySQL - MariaDB
+            await execConnectBackupMariaDb(dbHost, dbPort, dbUser, dbPassword, dbName, tempBackupDir);
+        }
 
         // Compactar backup
         const tarCommand = `tar -zcvf ${dumpDir}/backup.tar.gz -C ${tempBackupDir} .`;
@@ -124,14 +130,14 @@ exports.exeMongodump = async () => {
 
             await uploadToFTP(localFilePath, `${process.env.FTP_DIR}/${remoteFilePath}`);
             detailMessage.FileName = remoteFilePath;
-            detailMessage.size = infoFileSize.sizeKB;
+            detailMessage.size = infoFileSize.sizeKB ?? '---';
         }
         else if (process.env.SEND_TYPE == 'SW3') {
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
 
             const result = await uploadToSW3(localFilePath, remoteFilePath);
             detailMessage.FileName = remoteFilePath;
-            detailMessage.size = infoFileSize.sizeKB;
+            detailMessage.size = infoFileSize.sizeKB ?? '---';
             detailMessage.ETag = result.ETag;
             detailMessage.Location = result.Location;
         }
@@ -140,7 +146,7 @@ exports.exeMongodump = async () => {
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
             const result = await uploadToContabo(localFilePath, remoteFilePath);
             detailMessage.FileName = remoteFilePath;
-            detailMessage.size = infoFileSize.sizeKB;
+            detailMessage.size = infoFileSize.sizeKB ?? '---';
             detailMessage.ETag = result.ETag;
             detailMessage.Location = result.Location;
         }

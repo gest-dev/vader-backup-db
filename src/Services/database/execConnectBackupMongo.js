@@ -1,8 +1,9 @@
 const { MongoClient } = require('mongodb');
 const fs = require('fs');
-async function execConnectBackupMongo(mongodbURI, tempBackupDir) {
 
+async function execConnectBackupMongo(dbHost, dbPort, dbUser, dbPassword, dbName, tempBackupDir) {
 
+    const mongodbURI = `mongodb://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
     const client = new MongoClient(mongodbURI);
 
     try {

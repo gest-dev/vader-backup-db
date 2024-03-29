@@ -9,8 +9,8 @@ const { senMessageTelegran } = require('../Services/alert/sendTelegramAlert')
 const { senAlertApiWhatsapp } = require('../Services/alert/sendAlertApiWhatsapp')
 /* Upload server */
 const { uploadToFTP } = require('../Services/uplaod_service/FTP');
-const { uploadToSW3 } = require('../Services/uplaod_service/S3Aws');
-const { uploadToContabo } = require('../Services/uplaod_service/ContaboAws');
+const { uploadToAwsS3 } = require('../Services/uplaod_service/AwsS3');
+const { uploadToContaboStorage } = require('../Services/uplaod_service/ContaboStorage');
 /* Dump Databases */
 const { execConnectBackupMongo } = require('../Services/database/execConnectBackupMongo');
 const { execConnectBackupMariaDb } = require('../Services/database/execConnectBackupMariaDb');
@@ -120,40 +120,40 @@ exports.exeDBDump = async () => {
             type: 'Backup',
             sendType: process.env.SEND_TYPE,
             status: 'Success',
-            message: `Backup e upload concluídos com sucesso!`,
+            message: `Backup e upload sent success!`,
             ETag: '',
             Location: '',
         }
 
-        if (process.env.SEND_TYPE == 'FTP') {
+        if (process.env.SEND_TYPE == 'ftp') {
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
 
             await uploadToFTP(localFilePath, `${process.env.FTP_DIR}/${remoteFilePath}`);
             detailMessage.FileName = remoteFilePath;
             detailMessage.size = infoFileSize.sizeKB ?? '---';
         }
-        else if (process.env.SEND_TYPE == 'SW3') {
+        else if (process.env.SEND_TYPE == 'aws-s3') {
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
 
-            const result = await uploadToSW3(localFilePath, remoteFilePath);
+            const result = await uploadToAwsS3(localFilePath, remoteFilePath);
             detailMessage.FileName = remoteFilePath;
             detailMessage.size = infoFileSize.sizeKB ?? '---';
-            detailMessage.ETag = result.ETag;
-            detailMessage.Location = result.Location;
+            detailMessage.ETag = result.ETag?.replace(/"/g, '');
+            detailMessage.Location = result.Location ?? '---';
         }
-        else if (process.env.SEND_TYPE == 'CONTABO') {
+        else if (process.env.SEND_TYPE == 'contabo') {
 
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
-            const result = await uploadToContabo(localFilePath, remoteFilePath);
+            const result = await uploadToContaboStorage(localFilePath, remoteFilePath);
+
             detailMessage.FileName = remoteFilePath;
             detailMessage.size = infoFileSize.sizeKB ?? '---';
-            detailMessage.ETag = result.ETag;
-            detailMessage.Location = result.Location;
+            detailMessage.ETag = result.ETag?.replace(/"/g, '');
+            detailMessage.Location = result.Location ?? '---';
         }
         else {
             console.log('Tipo de envio não configurado');
         }
-
         console.log(`Backup e upload concluídos com sucesso ${formattedDate}.`);
 
         if (process.env.SEND_ALERT_TELEGRAM == 'true') {
@@ -169,13 +169,13 @@ exports.exeDBDump = async () => {
         // Limpar o conteúdo da pasta dump
         await cleanDirectory(dumpDir);
     } catch (error) {
-
+        const errorMessage = error.message.length > 20 ? error.message.slice(0, 20) + '...' : error.message;
         let detailMessage = {
             serverName: process.env.SERVER_NAME,
             type: 'Backup',
             sendType: process.env.SEND_TYPE,
             status: 'Error',
-            message: `Erro ao executar backup e upload: ${error.message}`,
+            message: `Erro ao executar backup e upload: ${errorMessage}`,
         }
 
         if (process.env.SEND_ALERT_TELEGRAM == 'true') {

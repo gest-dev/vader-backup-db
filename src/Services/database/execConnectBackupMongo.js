@@ -1,4 +1,5 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
+const { EJSON } = require('bson');
 const fs = require('fs');
 
 async function execConnectBackupMongo(dbHost, dbPort, dbUser, dbPassword, dbName, tempBackupDir) {
@@ -23,7 +24,11 @@ async function execConnectBackupMongo(dbHost, dbPort, dbUser, dbPassword, dbName
             const backupData = await database.collection(collectionName).find().toArray();
 
             const backupFilePath = `${tempBackupDir}/${collectionName}.json`;
-            fs.writeFileSync(backupFilePath, JSON.stringify(backupData));
+
+            // Use EJSON.stringify to serialize the data
+            const serializedData = EJSON.stringify(backupData, { relaxed: false });
+            fs.writeFileSync(backupFilePath, serializedData);
+
             console.log(`Backup da coleção ${collectionName} realizado com sucesso em ${backupFilePath}`);
         }
 

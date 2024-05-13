@@ -23,15 +23,6 @@ const dbName = process.env.DB_DBNAME;
 const dbPort = process.env.DB_PORT;
 const dbType = process.env.DB_TYPE;
 
-async function ensureDirectoryExists(directory) {
-    try {
-        await fs.access(directory);
-    } catch (error) {
-        // Se ocorrer um erro, a pasta não existe e será criada
-        await fs.mkdir(directory);
-    }
-}
-
 async function cleanDirectory(directory) {
     const files = await fs.readdir(directory);
 
@@ -46,6 +37,17 @@ async function cleanDirectory(directory) {
             // Se for um arquivo, usa unlink para excluir
             await fs.unlink(filePath);
         }
+    }
+}
+
+async function ensureDirectoryExists(directory) {
+    try {
+        await fs.access(directory);
+        //limpa o conteudo da pasta se existir
+        await cleanDirectory(directory);
+    } catch (error) {
+        // Se ocorrer um erro, a pasta não existe e será criada
+        await fs.mkdir(directory);
     }
 }
 

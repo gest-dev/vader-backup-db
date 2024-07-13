@@ -11,6 +11,7 @@ const { senAlertApiWhatsapp } = require('../Services/alert/sendAlertApiWhatsapp'
 const { uploadToFTP } = require('../Services/uplaod_service/FTP');
 const { uploadToAwsS3 } = require('../Services/uplaod_service/AwsS3');
 const { uploadToContaboStorage } = require('../Services/uplaod_service/ContaboStorage');
+const { uploadToMinioStorage } = require('../Services/uplaod_service/MinioStorage');
 /* Dump Databases */
 const { execConnectBackupMongo } = require('../Services/database/execConnectBackupMongo');
 const { execConnectBackupMariaDb } = require('../Services/database/execConnectBackupMariaDb');
@@ -100,7 +101,7 @@ exports.exeDBDump = async () => {
         // Executar backup Mongo
         if (dbType == 'mongo') {
             await execConnectBackupMongo(dbHost, dbPort, dbUser, dbPassword, dbName, tempBackupDir);
-        } else if (dbType == 'mariadb') {
+        } else if (dbType == 'mariadb' || dbType == 'mysql') {
             //Executar backup MySQL - MariaDB
             await execConnectBackupMariaDb(dbHost, dbPort, dbUser, dbPassword, dbName, tempBackupDir);
         }
@@ -126,7 +127,7 @@ exports.exeDBDump = async () => {
             ETag: '',
             Location: '',
         }
-
+        /* Upload file BK */
         if (process.env.SEND_TYPE == 'ftp') {
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
 
@@ -147,6 +148,16 @@ exports.exeDBDump = async () => {
 
             const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
             const result = await uploadToContaboStorage(localFilePath, remoteFilePath);
+
+            detailMessage.FileName = remoteFilePath;
+            detailMessage.size = infoFileSize.sizeKB ?? '---';
+            detailMessage.ETag = result.ETag?.replace(/"/g, '');
+            detailMessage.Location = result.Location ?? '---';
+
+        } else if (process.env.SEND_TYPE == 'minio') {
+
+            const remoteFilePath = `${process.env.SERVER_NAME}_${formattedDate}.tar.gz`;
+            const result = await uploadToMinioStorage(localFilePath, remoteFilePath);
 
             detailMessage.FileName = remoteFilePath;
             detailMessage.size = infoFileSize.sizeKB ?? '---';

@@ -1,9 +1,9 @@
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const fs = require('fs').promises;
 
-async function uploadToContaboStorage(localFilePath, remoteFilePath) {
+async function uploadToMinioStorage(localFilePath, remoteFilePath) {
     try {
-        // Configurar as credenciais Contabo (substitua com suas próprias credenciais)
+        // Configurar as credenciais Minio(S3) (substitua com suas próprias credenciais)
         const s3Client = new S3Client({
             region: process.env.S3_STORAGE_REGION, // substitua pela região apropriada
             credentials: {
@@ -11,7 +11,8 @@ async function uploadToContaboStorage(localFilePath, remoteFilePath) {
                 secretAccessKey: process.env.S3_STORAGE_SECRET_ACCESS_KEY,
             },
             endpoint: process.env.S3_STORAGE_ENDPOINT,
-            forcePathStyle: true
+            forcePathStyle: true,
+            signatureVersion: 'v4' 
         });
 
         // Leitura do arquivo local como uma stream
@@ -19,21 +20,21 @@ async function uploadToContaboStorage(localFilePath, remoteFilePath) {
 
         // Parâmetros para upload
         const params = {
-            Bucket: process.env.S3_STORAGE_BUCKET, // substitua com o nome do bucket da Contabo
+            Bucket: process.env.S3_STORAGE_BUCKET, // substitua com o nome do bucket da Minio(S3)
             Key: remoteFilePath,
             Body: fileStream,
         };
 
-        // Realizar o upload para a Contabo Storage
+        // Realizar o upload para a Minio(S3) Storage
         const command = new PutObjectCommand(params);
         const response = await s3Client.send(command);
         
         return response;
 
     } catch (error) {
-        console.error(`Erro durante o upload para Contabo Storage: ${error.message}`);
+        console.error(`Erro durante o upload para Minio(S3) Storage: ${error.message}`);
         throw error;
     }
 }
 
-exports.uploadToContaboStorage = uploadToContaboStorage;
+exports.uploadToMinioStorage = uploadToMinioStorage;

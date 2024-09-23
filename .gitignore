@@ -2,3 +2,6 @@ node_modules
 .env
 /dump
 /temp
+*Zone.Identifier
+*.Identifier
+**/Zone.Identifier

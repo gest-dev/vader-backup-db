@@ -1,8 +1,8 @@
 
-const { exec } = require('child_process');
 const { format } = require('date-fns');
 const fs = require('fs').promises;
 const path = require('path');
+const { execCommand } = require('../Services/utils/commandLib');
 
 /* Alert */
 const { senMessageTelegran } = require('../Services/alert/sendTelegramAlert')
@@ -52,20 +52,7 @@ async function ensureDirectoryExists(directory) {
     }
 }
 
-function execCommand(command, operation) {
-    return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`${operation} Error:`, error.message);
-                reject(error);
-            } else {
-                console.log(`${operation} Output:`, stdout || stderr);
-                resolve(stdout || stderr);
-            }
-        });
-    });
-}
-
+// Obter informações do arquivo
 async function fileSizeInfo(localFilePath) {
 
     try {
@@ -87,6 +74,31 @@ async function fileSizeInfo(localFilePath) {
     }
 }
 
+// compress files
+async function compressFiles(tempBackupDir, dumpDir) {
+    const absoluteTempBackupDir = path.resolve(tempBackupDir);
+    const absoluteDumpDir = path.resolve(dumpDir);
+
+    await execCommand(`sudo chmod -R 777 ${absoluteTempBackupDir}`, 'Change Permissions Temp Backup Dir');
+    await execCommand(`sudo chmod -R 777 ${absoluteDumpDir}`, 'Change Permissions Dump Dir');
+
+    console.log('Temp Backup Dir:', absoluteTempBackupDir);
+    console.log('Dump Dir:', absoluteDumpDir);
+
+    const files = await fs.readdir(absoluteTempBackupDir);
+    console.log('Conteúdo do diretório tempBackupDir:', files);
+
+    if (files.length === 0) {
+        console.log('A pasta está vazia, não há nada para compactar.');
+        throw new Error('A pasta está vazia, não há nada para compactar.');
+    } else {
+        const tarCommand = `cd ${absoluteTempBackupDir} && tar -czvf ${absoluteDumpDir}/backup.tar.gz *`;
+        await execCommand(tarCommand, 'Compress Backup');
+    }
+}
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 exports.exeDBDump = async () => {
 
@@ -107,8 +119,8 @@ exports.exeDBDump = async () => {
         }
 
         // Compactar backup
-        const tarCommand = `tar -zcvf ${dumpDir}/backup.tar.gz -C ${tempBackupDir} .`;
-        await execCommand(tarCommand, 'Compress Backup');
+        //await wait(1000); // aguardar 1 segundo para garantir que o arquivo foi criado
+        await compressFiles(tempBackupDir, dumpDir);
 
         // Data hora atual
         const now = new Date();
@@ -182,13 +194,14 @@ exports.exeDBDump = async () => {
         // Limpar o conteúdo da pasta dump
         await cleanDirectory(dumpDir);
     } catch (error) {
+
         const errorMessage = error.message.length > 20 ? error.message.slice(0, 20) + '...' : error.message;
         let detailMessage = {
             serverName: process.env.SERVER_NAME,
             type: 'Backup',
             sendType: process.env.SEND_TYPE,
             status: 'Error',
-            message: `Erro ao executar backup e upload: ${errorMessage}`,
+            message: `Erro ao executar backup: ${errorMessage}`,
         }
 
         if (process.env.SEND_ALERT_TELEGRAM == 'true') {
@@ -198,6 +211,6 @@ exports.exeDBDump = async () => {
             await senAlertApiWhatsapp(detailMessage);
         }
 
-        console.error('Erro:', error.message);
+        console.error('Erro Message', errorMessage);
     }
 }

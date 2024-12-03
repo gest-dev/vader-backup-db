@@ -12,6 +12,8 @@ async function execConnectBackupMongo(dbHost, dbPort, dbUser, dbPassword, dbName
         const mongodbURI = `mongodb://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
         client = new MongoClient(mongodbURI);
         if (process.env.DB_ACCESS_DUMP === 'shell') {
+            console.log("Tipo de BK Mongo DB_ACCESS_DUMP: ", process.env.DB_ACCESS_DUMP);
+
             // Verificar se o mongoexport está instalado
             try {
                 await execCommand('which mongoexport', 'Verificando se mongoexport está instalado');
@@ -38,6 +40,9 @@ async function execConnectBackupMongo(dbHost, dbPort, dbUser, dbPassword, dbName
             console.log('Backup do MongoDB realizado com sucesso usando mongoexport!');
 
         } else if (process.env.DB_ACCESS_DUMP === 'application') {
+
+            console.log("Tipo de BK Mongo DB_ACCESS_DUMP: ", process.env.DB_ACCESS_DUMP);
+
 
             // Conexão via MongoClient e backup manual das coleções
             await client.connect();

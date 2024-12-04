@@ -15,7 +15,7 @@
     "basic-ftp": "^5.0.5",
     "bson": "^6.8.0",
     "child_process": "^1.0.2",
-    "cron": "^3.1.7",
+    "cron": "^3.2.1",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "fs": "^0.0.1-security",

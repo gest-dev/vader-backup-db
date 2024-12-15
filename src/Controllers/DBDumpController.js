@@ -78,9 +78,13 @@ async function fileSizeInfo(localFilePath) {
 async function compressFiles(tempBackupDir, dumpDir) {
     const absoluteTempBackupDir = path.resolve(tempBackupDir);
     const absoluteDumpDir = path.resolve(dumpDir);
-
-    await execCommand(`sudo chmod -R 777 ${absoluteTempBackupDir}`, 'Change Permissions Temp Backup Dir');
-    await execCommand(`sudo chmod -R 777 ${absoluteDumpDir}`, 'Change Permissions Dump Dir');
+    if (process.env.ACCESS_SUDO == 'true') {
+        await execCommand(`sudo chmod -R 777 ${absoluteTempBackupDir}`, 'Change Permissions Temp Backup Dir');
+        await execCommand(`sudo chmod -R 777 ${absoluteDumpDir}`, 'Change Permissions Dump Dir');
+    } else {
+        await execCommand(`chmod -R 777 ${absoluteTempBackupDir}`, 'Change Permissions Temp Backup Dir');
+        await execCommand(`chmod -R 777 ${absoluteDumpDir}`, 'Change Permissions Dump Dir');
+    }
 
     console.log('Temp Backup Dir:', absoluteTempBackupDir);
     console.log('Dump Dir:', absoluteDumpDir);

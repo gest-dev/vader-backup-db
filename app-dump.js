@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { CronJob } = require("cron");
 const { exeDBDump } = require("./src/Controllers/DBDumpController");
-
+console.log("CronJob started: ", process.env.CRON_TIME || "0 */3 * * *");
 const job = new CronJob(
     process.env.CRON_TIME || "0 */3 * * *", // Padrão de tempo
     exeDBDump, // Passar como referência, sem os parênteses

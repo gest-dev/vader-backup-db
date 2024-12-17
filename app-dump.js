@@ -9,3 +9,5 @@ const job = new CronJob(
     true, // Iniciar automaticamente
     "America/Sao_Paulo" // Fuso horário
 );
+
+exeDBDump();

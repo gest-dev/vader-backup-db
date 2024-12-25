@@ -8,7 +8,8 @@ function execCommand(command, description) {
         //console.error(`Erro: ${stderr}`);
         reject(error);
       }
-      console.log(`Resultado: ${stdout}`);
+      //console.log(`Resultado: ${stdout}`);
+      console.log(`Resultado: ok`);
       resolve(stdout);
     });
   });

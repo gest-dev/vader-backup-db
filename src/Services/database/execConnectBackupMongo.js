@@ -33,7 +33,7 @@ async function execConnectBackupMongo(dbHost, dbPort, dbUser, dbPassword, dbName
                 const outputPath = `${tempBackupDir}/${dbName}_${collectionName}.json`;
                 const backupCommand = `mongoexport --host ${dbHost} --port ${dbPort} --username ${dbUser} --password ${dbPassword} --db ${dbName} --collection ${collectionName} --out ${outputPath}`;
 
-                console.log(backupCommand);
+                console.log('collectionName: ', collectionName);
                 await execCommand(backupCommand, `Executando backup da coleção ${collectionName}`);
             }
 
